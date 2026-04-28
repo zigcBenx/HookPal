@@ -15,7 +15,7 @@ export const requireAuth = cache(async () => {
   const user = await getCurrentUser();
   if (!user) {
     const { unauthorized } = await import("next/navigation");
-    unauthorized();
+    return unauthorized();
   }
   return user;
 });
@@ -25,11 +25,11 @@ export const requireAdmin = cache(async () => {
   const user = await getCurrentUser();
   if (!user) {
     const { unauthorized } = await import("next/navigation");
-    unauthorized();
+    return unauthorized();
   }
   if (user.role !== "admin") {
     const { forbidden } = await import("next/navigation");
-    forbidden();
+    return forbidden();
   }
   return user;
 });
