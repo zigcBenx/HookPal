@@ -12,7 +12,7 @@ export async function createCampaign(values: {
   description?: string;
   basePay: number;
   minVideos: number;
-  bonusPerView: number;
+  bonusPer1kViews: number;
   startDate: Date;
   endDate: Date;
 }) {
@@ -21,7 +21,7 @@ export async function createCampaign(values: {
   const parsed = campaignSchema.safeParse(values);
   if (!parsed.success) return { error: "Invalid fields" };
 
-  const { name, description, basePay, minVideos, bonusPerView, startDate, endDate } =
+  const { name, description, basePay, minVideos, bonusPer1kViews, startDate, endDate } =
     parsed.data;
 
   await db.insert(campaigns).values({
@@ -29,7 +29,7 @@ export async function createCampaign(values: {
     description,
     basePay,
     minVideos,
-    bonusPerView,
+    bonusPer1kViews,
     startDate,
     endDate,
   });
@@ -45,7 +45,7 @@ export async function updateCampaign(
     description?: string;
     basePay: number;
     minVideos: number;
-    bonusPerView: number;
+    bonusPer1kViews: number;
     startDate: Date;
     endDate: Date;
   }
@@ -55,7 +55,7 @@ export async function updateCampaign(
   const parsed = campaignSchema.safeParse(values);
   if (!parsed.success) return { error: "Invalid fields" };
 
-  const { name, description, basePay, minVideos, bonusPerView, startDate, endDate } =
+  const { name, description, basePay, minVideos, bonusPer1kViews, startDate, endDate } =
     parsed.data;
 
   await db
@@ -65,7 +65,7 @@ export async function updateCampaign(
       description,
       basePay,
       minVideos,
-      bonusPerView,
+      bonusPer1kViews,
       startDate,
       endDate,
       updatedAt: new Date(),

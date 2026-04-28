@@ -12,7 +12,7 @@ export const campaigns = sqliteTable("campaigns", {
   // Payment conditions
   basePay: real("base_pay").notNull(), // Fixed payment per creator
   minVideos: integer("min_videos").notNull(), // Minimum videos required for base pay
-  bonusPerView: real("bonus_per_view").default(0).notNull(), // Extra pay per view
+  bonusPer1kViews: real("bonus_per_1k_views").default(0).notNull(), // Extra pay per 1,000 views
 
   // Timeline
   startDate: integer("start_date", { mode: "timestamp" }).notNull(),

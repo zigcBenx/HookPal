@@ -6,7 +6,7 @@ export const campaignSchema = z
     description: z.string().optional(),
     basePay: z.coerce.number().min(0, "Base pay must be positive"),
     minVideos: z.coerce.number().int().min(1, "At least 1 video required"),
-    bonusPerView: z.coerce.number().min(0, "Bonus must be positive"),
+    bonusPer1kViews: z.coerce.number().min(0, "Bonus must be positive"),
     startDate: z.coerce.date({ required_error: "Start date is required" }),
     endDate: z.coerce.date({ required_error: "End date is required" }),
   })
@@ -15,4 +15,6 @@ export const campaignSchema = z
     path: ["endDate"],
   });
 
-export type CampaignInput = z.infer<typeof campaignSchema>;
+// z.infer gives the OUTPUT type (after coercion).
+// We use z.output explicitly to be clear this is the validated type.
+export type CampaignInput = z.output<typeof campaignSchema>;

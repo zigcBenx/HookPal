@@ -2,9 +2,9 @@
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/dal";
+import { requireAdmin, requireAuth } from "@/lib/dal";
 
 // All three actions follow the same pattern:
 // 1. Verify the caller is an admin (server-side, not just UI)
@@ -42,4 +42,17 @@ export async function terminateCreator(creatorId: string) {
     .where(eq(users.id, creatorId));
 
   revalidatePath("/admin/creators");
+}
+
+// Returns all active creators (id, name, email).
+// Used by the campaign assignment dialog to show who can be assigned.
+// Any authenticated user can call this — the UI only shows it to admins,
+// but the data itself (creator names) isn't sensitive.
+export async function getActiveCreators() {
+  await requireAuth();
+
+  return db
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(and(eq(users.role, "creator"), eq(users.status, "active")));
 }
