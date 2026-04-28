@@ -2,9 +2,26 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { CreatorActions } from "./creator-actions";
+
+const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  applied: "outline",
+  active: "default",
+  rejected: "destructive",
+  terminated: "secondary",
+};
 
 export default async function CreatorDetailPage({
   params,
@@ -22,92 +39,118 @@ export default async function CreatorDetailPage({
     notFound();
   }
 
+  const initials = creator.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const socials = [
+    { label: "TikTok", value: creator.tiktokHandle },
+    { label: "Instagram", value: creator.instagramHandle },
+    { label: "YouTube", value: creator.youtubeHandle },
+  ].filter((s) => s.value);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{creator.name}</h1>
-          <p className="text-muted-foreground">{creator.email}</p>
+      {/* Back link */}
+      <Link
+        href="/admin/creators"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to creators
+      </Link>
+
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-14 w-14">
+            <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight">
+                {creator.name}
+              </h1>
+              <Badge variant={statusVariant[creator.status]}>
+                {creator.status}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">{creator.email}</p>
+          </div>
         </div>
         <CreatorActions creatorId={creator.id} status={creator.status} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Separator />
+
+      {/* Details */}
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+            <CardDescription>Personal details and contact info.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Badge
-              variant={
-                creator.status === "active"
-                  ? "default"
-                  : creator.status === "rejected"
-                    ? "destructive"
-                    : "secondary"
-              }
-            >
-              {creator.status}
-            </Badge>
+          <CardContent className="space-y-4">
+            <InfoRow label="Email" value={creator.email} />
+            <InfoRow label="Phone" value={creator.phone} />
+            <InfoRow label="Country" value={creator.country} />
+            <InfoRow
+              label="Joined"
+              value={creator.createdAt.toLocaleDateString()}
+            />
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Country</CardTitle>
+          <CardHeader>
+            <CardTitle>Social Profiles</CardTitle>
+            <CardDescription>Connected platform handles.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm">{creator.country || "Not provided"}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Phone</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{creator.phone || "Not provided"}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">TikTok</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{creator.tiktokHandle || "—"}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Instagram</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{creator.instagramHandle || "—"}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">YouTube</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{creator.youtubeHandle || "—"}</p>
+          <CardContent className="space-y-4">
+            {socials.length > 0 ? (
+              socials.map((s) => (
+                <InfoRow key={s.label} label={s.label} value={s.value} />
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No social profiles provided.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
 
+      {/* Bio */}
       {creator.bio && (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Bio</CardTitle>
+          <CardHeader>
+            <CardTitle>Bio</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm">{creator.bio}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {creator.bio}
+            </p>
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium">{value || "—"}</span>
     </div>
   );
 }

@@ -2,10 +2,9 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 
-// This type matches the shape of data we'll SELECT from the database.
-// We only include fields we need for the table — not the full user row.
 export type CreatorRow = {
   id: string;
   name: string;
@@ -15,7 +14,10 @@ export type CreatorRow = {
   createdAt: Date;
 };
 
-const statusVariant: Record<CreatorRow["status"], "default" | "secondary" | "destructive" | "outline"> = {
+const statusVariant: Record<
+  CreatorRow["status"],
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   applied: "outline",
   active: "default",
   rejected: "destructive",
@@ -25,19 +27,33 @@ const statusVariant: Record<CreatorRow["status"], "default" | "secondary" | "des
 export const columns: ColumnDef<CreatorRow>[] = [
   {
     accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => (
-      <Link
-        href={`/admin/creators/${row.original.id}`}
-        className="font-medium hover:underline"
-      >
-        {row.getValue("name")}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
+    header: "Creator",
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string;
+      const initials = name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+
+      return (
+        <Link
+          href={`/admin/creators/${row.original.id}`}
+          className="flex items-center gap-3 hover:opacity-80"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate font-medium">{name}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {row.original.email}
+            </p>
+          </div>
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "status",
@@ -50,14 +66,22 @@ export const columns: ColumnDef<CreatorRow>[] = [
   {
     accessorKey: "country",
     header: "Country",
-    cell: ({ row }) => row.getValue("country") || "—",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.getValue("country") || "—"}
+      </span>
+    ),
   },
   {
     accessorKey: "createdAt",
     header: "Applied",
     cell: ({ row }) => {
       const date = row.getValue("createdAt") as Date;
-      return date.toLocaleDateString();
+      return (
+        <span className="text-muted-foreground">
+          {date.toLocaleDateString()}
+        </span>
+      );
     },
   },
 ];

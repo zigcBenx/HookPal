@@ -50,30 +50,41 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-6 py-4">
-        <span className="text-lg font-semibold tracking-tight">
-          UGC Manager
-        </span>
+      <SidebarHeader className="px-6 py-5">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Megaphone className="h-4 w-4" />
+          </div>
+          <span className="text-lg font-bold tracking-tight">
+            UGC Manager
+          </span>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="uppercase text-xs tracking-wider text-muted-foreground/60">
+            Menu
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {links.map((link) => (
-                <SidebarMenuItem key={link.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === link.href}
-                  >
-                    <Link href={link.href}>
-                      <link.icon />
-                      <span>{link.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {links.map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== "/dashboard" &&
+                    pathname.startsWith(link.href));
+
+                return (
+                  <SidebarMenuItem key={link.href}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={link.href}>
+                        <link.icon />
+                        <span>{link.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
